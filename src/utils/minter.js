@@ -136,7 +136,7 @@ export const transferOwnership = async (
 
 export const getOwners = async (minterContract) => {
   try {
-    const ownerCount = await minterContract.methods.getOwners().call();
+    const ownerCount = await minterContract.methods.owners().call();
     return ownerCount;
   } catch (error) {
     console.log({ error });

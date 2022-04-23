@@ -65,7 +65,7 @@ describe("WatchNFT", function () {
     .connect(acc1)
     .makeTransfer(acc1.address, acc2.address, 0);
     await watchNFT.connect(acc2).makeTransfer(acc2.address, owner.address,0);
-    const owners = await watchNFT.connect(acc1).getOwners();
+    const owners = await watchNFT.connect(acc1).owners();
     console.log(owners);
   })
 });

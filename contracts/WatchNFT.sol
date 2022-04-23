@@ -12,10 +12,13 @@ contract WatchNFT is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
 
     Counters.Counter private _tokenIdCounter;
 
+    //    if an address is unique so we can increase owners
+    mapping(address => bool) public isNftOwner;
+
     constructor() ERC721("Watch NFT", "WNFT") {
     }
 
-    uint owners = 0;
+    uint public owners = 0;
 
     function safeMint(address to, string memory uri)
         public
@@ -28,12 +31,19 @@ contract WatchNFT is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
 
     function makeTransfer(address to, address from, uint256 tokenId)public{
         safeTransferFrom(to, from, tokenId);
-        owners++;
+        bool addressGiftedNft= isNftOwner[msg.sender];
+
+//        if the address is unique, increase the owners and set the address to not unique
+        if(!addressGiftedNft){
+            isNftOwner[msg.sender] = true;
+            owners++;
+        }
+
     }
 
-    function getOwners() public view returns(uint256){
-        return owners;
-    }
+//    function getOwners() public view returns(uint256){
+//        return owners;
+//    }
 
 
     // The following functions are overrides required by Solidity.

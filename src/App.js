@@ -6,8 +6,6 @@ import { useBalance, useMinterContract } from "./hooks";
 
 import Nfts from "./components/minter/nfts";
 import { useContractKit } from "@celo-tools/use-contractkit";
-
-import coverImg from "./assets/img/nft_geo_cover.png";
 import "./App.css";
 
 import { Container, Nav } from "react-bootstrap";

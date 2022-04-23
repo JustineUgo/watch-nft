@@ -10,8 +10,7 @@ import {
   getNfts,
   createNft,
   fetchNftContractOwner,
-  transferOwnership,
-  getOwners
+  transferOwnership
 } from "../../../utils/minter";
 import { Row } from "react-bootstrap";
 
@@ -96,7 +95,7 @@ const NftList = ({ minterContract, name }) => {
               <AddNfts save={addNft} address={address} />
             </div>
             <Row xs={1} sm={2} lg={3} className="g-3  mb-5 g-xl-4 g-xxl-5">
-          
+
               {/* display all NFTs */}
               {nfts.map((_nft) => (
                 <Nft

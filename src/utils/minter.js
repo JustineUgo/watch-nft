@@ -1,5 +1,6 @@
 import { create as ipfsHttpClient } from "ipfs-http-client";
 import axios from "axios";
+import { ethers } from "ethers";
 
 // initialize IPFS
 const client = ipfsHttpClient("https://ipfs.infura.io:5001/api/v0");
@@ -8,7 +9,7 @@ const client = ipfsHttpClient("https://ipfs.infura.io:5001/api/v0");
 export const createNft = async (
   minterContract,
   performActions,
-  { name, description, ipfsImage, ownerAddress, attributes }
+  { name, price, description, ipfsImage, ownerAddress, attributes }
 ) => {
   await performActions(async (kit) => {
     if (!name || !description || !ipfsImage) return;
@@ -17,6 +18,7 @@ export const createNft = async (
     // convert NFT metadata to JSON format
     const data = JSON.stringify({
       name,
+      price,
       description,
       image: ipfsImage,
       owner: defaultAccount,
@@ -29,10 +31,11 @@ export const createNft = async (
 
       // IPFS url for uploaded metadata
       const url = `https://ipfs.infura.io/ipfs/${added.path}`;
+      const _price = ethers.utils.parseUnits(String(price), "ether");
 
       // mint the NFT and save the IPFS url to the blockchain
       let transaction = await minterContract.methods
-        .safeMint(ownerAddress, url)
+        .safeMint(url, _price)
         .send({ from: defaultAccount });
 
       return transaction;
@@ -60,9 +63,10 @@ export const uploadToIpfs = async (e) => {
 export const getNfts = async (minterContract) => {
   try {
     const nfts = [];
-    const nftsLength = await minterContract.methods.totalSupply().call();
+    const nftsLength = await minterContract.methods.getWatchLength().call();
     for (let i = 0; i < Number(nftsLength); i++) {
       const nft = new Promise(async (resolve) => {
+        const watch = await minterContract.methods.getWatch(i).call();
         const res = await minterContract.methods.tokenURI(i).call();
         const meta = await fetchNftMeta(res);
         const owner = await fetchNftOwner(minterContract, i);
@@ -70,6 +74,8 @@ export const getNfts = async (minterContract) => {
           index: i,
           tokenId: i,
           owner,
+          price: watch.price,
+          sold: watch.sold,
           name: meta.data.name,
           image: meta.data.image,
           description: meta.data.description,
@@ -124,9 +130,42 @@ export const transferOwnership = async (
   try {
     await performActions(async (kit) => {
       const { defaultAccount } = kit;
-      console.log(ownerAddress, newAddress, tokenId, defaultAccount);
+      // console.log(ownerAddress, newAddress, tokenId, defaultAccount);
       await minterContract.methods
         .makeTransfer(ownerAddress, newAddress, tokenId)
+        .send({ from: defaultAccount });
+    });
+  } catch (error) {
+    console.log({ error });
+  }
+};
+
+export const buyWatch = async (
+  minterContract,
+  index,
+  tokenId,
+  performActions
+) => {
+  try {
+    await performActions(async (kit) => {
+      const { defaultAccount } = kit;
+      // console.log(ownerAddress, newAddress, tokenId, defaultAccount);
+      const watch = await minterContract.methods.getWatch(index).call();
+      await minterContract.methods
+        .buyWatch(tokenId)
+        .send({ from: defaultAccount, value: watch.price });
+    });
+  } catch (error) {
+    console.log({ error });
+  }
+};
+
+export const sellWatch = async (minterContract, tokenId, performActions) => {
+  try {
+    await performActions(async (kit) => {
+      const { defaultAccount } = kit;
+      await minterContract.methods
+        .sellWatch(tokenId)
         .send({ from: defaultAccount });
     });
   } catch (error) {

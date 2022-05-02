@@ -7,7 +7,6 @@ import { useBalance, useMinterContract } from "./hooks";
 import Nfts from "./components/minter/nfts";
 import { useContractKit } from "@celo-tools/use-contractkit";
 
-import coverImg from "./assets/img/nft_geo_cover.png";
 import "./App.css";
 
 import { Container, Nav } from "react-bootstrap";
@@ -54,7 +53,13 @@ const App = function AppWrapper() {
         </Container>
       ) : (
         //  if user wallet is not connected display cover page
-        <Cover name="Watch Collection" coverImg={"https://images.unsplash.com/photo-1609587312208-cea54be969e7?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"} connect={connect} />
+        <Cover
+          name="Watch Collection"
+          coverImg={
+            "https://images.unsplash.com/photo-1609587312208-cea54be969e7?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
+          }
+          connect={connect}
+        />
       )}
     </>
   );

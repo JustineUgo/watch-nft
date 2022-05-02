@@ -8,10 +8,12 @@ import Loader from "../../ui/Loader";
 import { NotificationSuccess, NotificationError } from "../../ui/Notifications";
 import {
   getNfts,
+  buyWatch,
+  sellWatch,
   createNft,
   fetchNftContractOwner,
   transferOwnership,
-  getOwners
+  getOwners,
 } from "../../../utils/minter";
 import { Row } from "react-bootstrap";
 
@@ -23,7 +25,7 @@ const NftList = ({ minterContract, name }) => {
   const [nfts, setNfts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [nftOwner, setNftOwner] = useState(null);
-  const  {defaultAccount} = kit;
+  const { defaultAccount } = kit;
   const getAssets = useCallback(async () => {
     try {
       setLoading(true);
@@ -55,10 +57,40 @@ const NftList = ({ minterContract, name }) => {
     }
   };
 
-  const sendNft = async (address, tokenId, owner)=>{
+  const buyNft = async (index, tokenId) => {
     try {
       setLoading(true);
-      await transferOwnership(minterContract,owner, address, tokenId, performActions)
+      await buyWatch(minterContract, index, tokenId, performActions);
+      getAssets();
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sellNft = async (index) => {
+    try {
+      setLoading(true);
+      await sellWatch(minterContract, index, performActions);
+      getAssets();
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sendNft = async (address, tokenId, owner) => {
+    try {
+      setLoading(true);
+      await transferOwnership(
+        minterContract,
+        owner,
+        address,
+        tokenId,
+        performActions
+      );
       toast(<NotificationSuccess text="Updating NFT list...." />);
       getAssets();
     } catch (error) {
@@ -67,7 +99,7 @@ const NftList = ({ minterContract, name }) => {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   const fetchContractOwner = useCallback(async (minterContract) => {
     // get the address that deployed the NFT contract
@@ -96,13 +128,14 @@ const NftList = ({ minterContract, name }) => {
               <AddNfts save={addNft} address={address} />
             </div>
             <Row xs={1} sm={2} lg={3} className="g-3  mb-5 g-xl-4 g-xxl-5">
-          
               {/* display all NFTs */}
               {nfts.map((_nft) => (
                 <Nft
                   key={_nft.index}
-                  contractOwner = {defaultAccount}
-                  send = {sendNft}
+                  contractOwner={defaultAccount}
+                  buyNft={() => buyNft(_nft.index, _nft.tokenId)}
+                  sellNft={() => sellNft(_nft.tokenId)}
+                  send={sendNft}
                   nft={{
                     ..._nft,
                   }}
